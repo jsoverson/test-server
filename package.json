@@ -5,7 +5,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
-    "build": "npm run clean && tsc --declaration",
+    "compile": "npm run clean && tsc --declaration",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run compile",
     "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
