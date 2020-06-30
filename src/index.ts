@@ -49,7 +49,7 @@ export class TestServer {
     }
     return -1;
   }
-  url(path: string) {
+  url(path?: string) {
     return `${this.address}${path || ''}`;
   }
   get address() {
