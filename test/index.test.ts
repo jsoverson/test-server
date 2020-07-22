@@ -1,5 +1,5 @@
-import { expect } from 'chai';
-import { start } from '../src';
+import {expect} from 'chai';
+import {start, TestServer} from '../src';
 import fetch from 'node-fetch';
 import path from 'path';
 
@@ -7,8 +7,14 @@ const messageRoot = require('../server_root/message.json');
 const messageLocal = require('./server_root/message.json');
 
 describe('test-server', function () {
+  let server: TestServer;
+
+  afterEach(async () => {
+    if (server) await server.stop();
+  });
+
   it('Should start and stop with no arguments', async () => {
-    const server = await start();
+    server = await start();
     const url = `http://127.0.0.1:${server.port}/message.json`;
     expect(server.port)
       .to.be.greaterThan(2 ** 10)
@@ -18,11 +24,10 @@ describe('test-server', function () {
     const result = await fetch(url);
     const obj = await result.json();
     expect(obj.message).to.equal(messageRoot.message);
-    await server.stop();
   });
 
   it('Should take custom path', async () => {
-    const server = await start(__dirname, 'server_root');
+    server = await start(__dirname, 'server_root');
     const url = server.url('message.json');
     expect(server.port)
       .to.be.greaterThan(2 ** 10)
@@ -31,6 +36,31 @@ describe('test-server', function () {
     const result = await fetch(url);
     const obj = await result.json();
     expect(obj.message).to.equal(messageLocal.message);
-    await server.stop();
+  });
+
+  it('URLs ending in /drop should drop connections', async () => {
+    server = await start(__dirname, 'server_root');
+    const url = server.url('drop');
+    const result = await fetch(url).catch(() => 'error');
+    expect(result).to.equal('error');
+  });
+
+  it('/wait/#### should wait #### long', async () => {
+    server = await start(__dirname, 'server_root');
+    const url = server.url('wait/500');
+    const startTime = Date.now();
+    const response = await fetch(url);
+    const timeWaited = parseInt(await response.text());
+    const endTime = Date.now();
+    const testTime = endTime - startTime;
+    expect(testTime).to.be.greaterThan(500);
+    expect(timeWaited).to.be.greaterThan(499);
+  });
+
+  it('/status/#### should return a status of ####', async () => {
+    server = await start(__dirname, 'server_root');
+    const url = server.url('status/404');
+    const result = await fetch(url).catch(e => e);
+    expect(result.status).to.equal(404);
   });
 });

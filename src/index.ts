@@ -1,5 +1,5 @@
 import handler from 'serve-handler';
-import { Server, IncomingMessage, ServerResponse } from 'http';
+import {Server, IncomingMessage, ServerResponse} from 'http';
 import path from 'path';
 import DEBUG from 'debug';
 
@@ -20,12 +20,32 @@ export class TestServer {
       this.httpServer = new Server();
       this.httpServer.on('request', (request: IncomingMessage, response: ServerResponse) => {
         debug(`server request ${request.url}...`);
-        return handler(request, response, {
-          public: this.path,
-          directoryListing: true,
-          cleanUrls: false,
-          trailingSlash: true
-        });
+        const url = request.url;
+        if (url) {
+          if (url.endsWith('/drop')) {
+            request.socket.end();
+            return;
+          } else if (url.match(/\/wait\/(\d+)/)) {
+            const time = RegExp.$1;
+            const start = Date.now();
+            setTimeout(() => {
+              const time = Date.now() - start;
+              response.end(time.toString());
+            }, parseInt(time));
+          } else if (url.match(/\/status\/(\d+)/)) {
+            response.statusCode = parseInt(RegExp.$1);
+            response.end(RegExp.$1);
+          } else {
+            return handler(request, response, {
+              public: this.path,
+              directoryListing: true,
+              cleanUrls: false,
+              trailingSlash: true,
+            });
+          }
+        } else {
+          response.end('No URL passed. You must specify a valid filename or a magic URL.');
+        }
       });
       this.httpServer.listen({
         port: this._port,
