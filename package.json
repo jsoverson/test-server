@@ -1,6 +1,6 @@
 {
   "name": "@jsoverson/test-server",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Quick local server for http integration tests",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
