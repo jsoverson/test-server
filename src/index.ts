@@ -34,6 +34,7 @@ export class TestServer {
             }, parseInt(time));
           } else if (url === '/cached') {
             response.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            response.setHeader('Last-Modified', 'Wed, 21 Oct 2015 07:28:00 GMT');
             response.end(`${Math.random()}`);
           } else if (url.match(/\/status\/(\d+)/)) {
             response.statusCode = parseInt(RegExp.$1);
