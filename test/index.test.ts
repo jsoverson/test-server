@@ -63,4 +63,17 @@ describe('test-server', function () {
     const result = await fetch(url).catch(e => e);
     expect(result.status).to.equal(404);
   });
+
+  it('/cached should return a random number with long cache headers', async () => {
+    // TODO: actually test cache headers.
+    server = await start(__dirname, 'server_root');
+    const url = server.url('cached');
+    const result1 = await fetch(url).catch(e => e);
+    expect(result1.status).to.equal(200);
+    const body1 = await result1.text();
+    const result2 = await fetch(url).catch(e => e);
+    expect(result2.status).to.equal(200);
+    const body2 = await result2.text();
+    expect(body1).to.not.equal(body2);
+  });
 });
