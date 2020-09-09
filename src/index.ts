@@ -33,7 +33,7 @@ export class TestServer {
               response.end(time.toString());
             }, parseInt(time));
           } else if (url === '/cached') {
-            // response.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            response.setHeader('Cache-Control', 'public, max-age=604800, immutable');
             response.end(`${Math.random()}`);
           } else if (url.match(/\/status\/(\d+)/)) {
             response.statusCode = parseInt(RegExp.$1);
